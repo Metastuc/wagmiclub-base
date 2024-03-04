@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import {
   base,
+  baseSepolia,
 } from 'wagmi/chains';
 
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
@@ -25,17 +26,18 @@ const connectors = connectorsForWallets(
     },
   ],
   {
-    appName: 'My RainbowKit App',
+    appName: 'WagmiClub',
     projectId: 'YOUR_PROJECT_ID',
   }
 );
 
 const config = createConfig({
-  chains: [mainnet, sepolia],
+  chains: [base, baseSepolia],
   connectors,
   ssr: true, 
   transports: {
     [base.id]: http('https://mainnet.example.com'),
+    [baseSepolia.id]: http('https://mainnet.example.com'),
   },
 })
 
