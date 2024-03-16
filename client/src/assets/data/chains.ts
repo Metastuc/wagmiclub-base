@@ -1,7 +1,7 @@
-export const arbitrum_sepolia = {
-	chainId: 421614,
-	name: `Arbitrum Sepolia`,
+export const Base_Sepolia= {
+	chainId: 84532,
+	name: `Base_Sepolia`,
 	currency: `ETH`,
-	rpcUrl: `https://sepolia-rollup.arbitrum.io/rpc`,
-	explorerUrl: `https://sepolia.arbiscan.io`,
+	rpcUrl: `https://sepolia.base.org`,
+	explorerUrl: `https://sepolia-explorer.base.org`,
 };

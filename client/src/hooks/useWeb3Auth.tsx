@@ -3,13 +3,13 @@
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers/react";
 import { FC, ReactNode } from "react";
 
-import { arbitrum_sepolia } from "@/assets/data/chains";
+import { Base_Sepolia } from "@/assets/data/chains";
 
 interface Props {
 	children: ReactNode;
 }
 
-const chains = [arbitrum_sepolia];
+const chains = [Base_Sepolia];
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!;
 
 const metadata = {
@@ -23,7 +23,7 @@ const ethersConfig = defaultConfig({
 	metadata,
 	enableEmail: true,
 	defaultChainId: chains[0].chainId,
-	rpcUrl: `https://sepolia-rollup.arbitrum.io/rpc`,
+	rpcUrl: `https://sepolia.base.org`,
 	enableEIP6963: true,
 	enableInjected: true,
 	enableCoinbase: true,
@@ -34,7 +34,7 @@ createWeb3Modal({
 	projectId,
 	ethersConfig,
 	enableAnalytics: true,
-	defaultChain: arbitrum_sepolia,
+	defaultChain: Base_Sepolia,
 });
 
 export const Web3Modal: FC<Props> = ({ children }) => {
