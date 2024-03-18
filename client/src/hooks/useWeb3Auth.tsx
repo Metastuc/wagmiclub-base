@@ -1,16 +1,39 @@
 "use client";
 
+import { mainnet } from "@/assets/data/chains";
+import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
+import WalletConnect from "@walletconnect/web3-provider";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers/react";
 import { FC, ReactNode } from "react";
-
-import { Base_Sepolia } from "@/assets/data/chains";
+import W3M from "web3modal";
 
 interface Props {
 	children: ReactNode;
 }
 
-const chains = [Base_Sepolia];
+const chains = [mainnet];
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!;
+const alchemyId = process.env.NEXT_PUBLIC_ALCHEMY_ID!;
+
+export const providerOptions = {
+	coinbasewallet: {
+		package: CoinbaseWalletSDK,
+		options: {
+			appName: "WAGMI Club",
+			rpc: {
+				1: `https://eth-mainnet.alchemyapi.io/v2/${alchemyId}`,
+			},
+		},
+	},
+	walletconnect: {
+		package: WalletConnect,
+		options: {
+			rpc: {
+				1: `https://eth-mainnet.alchemyapi.io/v2/${alchemyId}`,
+			},
+		},
+	},
+};
 
 const metadata = {
 	name: "WAGMI Club",
@@ -22,8 +45,7 @@ const metadata = {
 const ethersConfig = defaultConfig({
 	metadata,
 	enableEmail: true,
-	defaultChainId: chains[0].chainId,
-	rpcUrl: `https://sepolia.base.org`,
+	defaultChainId: 1,
 	enableEIP6963: true,
 	enableInjected: true,
 	enableCoinbase: true,
@@ -34,9 +56,10 @@ createWeb3Modal({
 	projectId,
 	ethersConfig,
 	enableAnalytics: true,
-	defaultChain: Base_Sepolia,
+	defaultChain: mainnet,
 });
 
 export const Web3Modal: FC<Props> = ({ children }) => {
 	return children;
 };
+

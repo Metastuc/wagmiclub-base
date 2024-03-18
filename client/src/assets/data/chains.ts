@@ -1,7 +1,7 @@
-export const Base_Sepolia= {
-	chainId: 84532,
-	name: `Base_Sepolia`,
-	currency: `ETH`,
-	rpcUrl: `https://sepolia.base.org`,
-	explorerUrl: `https://sepolia-explorer.base.org`,
+export const mainnet = {
+	chainId: 1,
+	name: 'Ethereum',
+	currency: 'ETH',
+	explorerUrl: 'https://etherscan.io',
+	rpcUrl: 'https://cloudflare-eth.com'
 };

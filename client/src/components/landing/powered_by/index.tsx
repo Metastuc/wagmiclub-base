@@ -50,7 +50,7 @@ export const PoweredBy = ({ group }: { group: string }) => {
 					<div>
 						<i>
 							<img
-								src="/arbitrum-big.png"
+								src="/base.png"
 								alt=""
 							/>
 						</i>
