@@ -262,6 +262,15 @@ export const mintBadge = async (mintBody) => {
 
 		const data = await response.json();
 
+		const contract = new ethers.Contract(
+			badgeContractAddress,
+			badgeABI,
+			signer,
+		);
+		const TX = await contract.mint(mintBody.receiver);
+		const receipt = await TX.wait();
+		console.log("created", receipt);
+
 		console.log("Minted Successfully", data.response);
 	} catch (error) {
 		console.log(error);
