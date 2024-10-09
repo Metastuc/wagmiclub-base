@@ -1,8 +1,12 @@
 import { BADGE_SCHEMA } from "@/assets/data";
 import { BadgeForm, ImageUpload, Rating } from "@/components";
-import { mintBadge } from "@/utils/app.mjs";
+import { mintBadge, badgeContractAddress } from "@/utils/app.mjs";
 import { useFormik } from "formik";
+import { useWriteContract, useAccount } from 'wagmi';
 import "./index.scss";
+import { getConfig } from "@/wagmi";
+import { getEnsAddress } from '@wagmi/core'
+import { normalize } from 'viem/ens';
 
 export const Badge = ({ group }: { group: string }) => {
 	const initialValues = {
@@ -17,6 +21,23 @@ export const Badge = ({ group }: { group: string }) => {
 		validator: "",
 		working: false,
 	};
+
+	const { writeContract } = useWriteContract() 
+	const abi = [
+		{
+			stateMutability: "nonpayable",
+			type: "function",
+			inputs: [
+				{
+					internalType: "address",
+					name: "owner",
+					type: "address",
+				},
+			],
+			name: "mint",
+			outputs: [],			
+		},
+	] as const
 
 	const {
 		values,
@@ -33,7 +54,17 @@ export const Badge = ({ group }: { group: string }) => {
 			console.log("Formik data:", values);
 			// Handle form submission logic here (e.g., API call)
 			try {
-				await mintBadge(values);
+				const account = useAccount();
+				const address = account.address || "";
+				await mintBadge(values, address);
+				writeContract(
+					{ 
+					  address: badgeContractAddress, 
+					  abi, 
+					  functionName: "mint", 
+					  args: [values.receiver as `0x${string}`], 
+					}
+				  )
 			} catch (error) {
 				console.log(error);
 			}

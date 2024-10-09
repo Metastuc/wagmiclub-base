@@ -15,9 +15,12 @@ export const BADGE_SCHEMA = yup.object().shape({
 
 	// Validation for receiver address field
 	receiver: yup
-		.string()
-		.required("Receiver address is required")
-		.matches(/^(0x)?[a-fA-F0-9]{40}$/, "Invalid or incomplete address"),
+	.string()
+	.required("Receiver address/basename is required")
+	.matches(
+	  /^(0x[a-fA-F0-9]{40}|[a-zA-Z0-9-]+\.base\.eth)$/, 
+	  "Invalid or incomplete address/basename"
+	),
 
 	// Validation for working status field
 	working: yup.boolean(),

@@ -9,8 +9,6 @@ import {
 } from "@/components";
 import "./page.scss";
 
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
-
 interface TabComponents {
 	[key: string]: ReactNode;
 }
@@ -43,10 +41,6 @@ const Explore = () => {
 	function renderTab() {
 		return tabComponents[activeTab] || null;
 	}
-
-	const { address } = useWeb3ModalAccount();
-
-	console.log({ address });
 
 	return (
 		<section className="explore">

@@ -3,38 +3,95 @@
 import { EDIT_SCHEMA } from "@/assets/data";
 import { Details, Socials } from "@/components";
 import { signUp } from "@/utils/app.mjs";
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useFormik } from "formik";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useAccount } from 'wagmi';
+import { getBasename, getBasenameTextRecord, getBasenameAvatar, BasenameTextRecordKeys } from "@/utils/basename/resolver";
 
 import "./index.scss";
 
-interface FormValues {
-	account: string;
-	bio: string;
+// interface FormValues {
+// 	account: string;
+// 	bio: string;
+// 	discord: string;
+// 	name: string;
+// 	occupation: string;
+// 	telegram: string;
+// 	username: string;
+// 	xDotCom: string;
+// 	youtube: string;
+// }
+
+interface UserDetails {
+	basename: string;
 	discord: string;
-	name: string;
-	occupation: string;
 	telegram: string;
-	username: string;
-	xDotCom: string;
-	youtube: string;
+	twitter: string;
+	url: string;
+	avatar: string
 }
 
+
 export const FormField = ({ activeTab }: { activeTab: string }) => {
-	const { address, isConnected } = useWeb3ModalAccount();
+
+	const [userDetails, setUserDetails] = useState<UserDetails>({
+		basename: "",
+		discord: "Discord",
+		telegram: "Telegram",
+		twitter: "Twitter",
+		url: "website",
+		avatar: ""
+	});
+
+	const account = useAccount();
+	const isConnected = account.isConnected;
+	const address = account.address || ""; // Fallback to an empty string
+
+	useEffect(() => {
+		const fetchBasename = async () => {
+		  if (address) {
+			const basename = await getBasename(address);
+	
+			if (basename && basename.endsWith(".base.eth")) {
+			  // Fetch additional text records
+			  const discord = await getBasenameTextRecord(basename, BasenameTextRecordKeys.Discord) || "";
+			  const telegram = await getBasenameTextRecord(basename, BasenameTextRecordKeys.Telegram) || "";
+			  const twitter = await getBasenameTextRecord(basename, BasenameTextRecordKeys.Twitter) || "";
+			  const url = await getBasenameTextRecord(basename, BasenameTextRecordKeys.Url) || "";
+	
+			  // Fetch avatar
+			  const avatar = await getBasenameAvatar(basename) || "";
+	
+			  // Set the user details
+			  setUserDetails({
+				basename: basename,
+				discord: discord,
+				telegram: telegram,
+				twitter: twitter,
+				url: url,
+				avatar: avatar,
+			  });
+			}
+		  }
+		};
+	
+		fetchBasename();
+	  }, [address]); // Re-run when the address changes
+	
+
+	// const { address, isConnected } = useWeb3ModalAccount();
 
 	const initialValues = {
 		account: activeTab,
 		bio: "",
-		discord: "",
+		discord: userDetails.discord,
 		name: "",
 		occupation: "",
-		telegram: "",
-		username: "",
-		xDotCom: "",
-		website: "",
-		youtube: "",
+		telegram: userDetails.telegram,
+		username: userDetails.basename,
+		xDotCom: userDetails.twitter,
+		website: userDetails.url,
+		youtube: "Youtube",
 	};
 
 	const {

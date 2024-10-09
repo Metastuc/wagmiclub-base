@@ -11,6 +11,7 @@ import {
 } from "@/components";
 import { useUserStore } from "@/hooks";
 import { useWeb3Modal, useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -73,12 +74,19 @@ interface UserProfileData {
 }
 
 const Profile = () => {
+	const account = useAccount();
+	const isConnected = account.isConnected;
+	const address = account.address || ""; // Fallback to an empty string
+	const { connectors, connect } = useConnect();
+	const { disconnect } = useDisconnect();
+	const connector = connectors[1];
+
 	const group = "profile";
 	const router = useRouter();
 	const { setUserName, setUserTitle } = useUserStore();
 
-	const { address, isConnected } = useWeb3ModalAccount();
-	const { open } = useWeb3Modal();
+	// const { address, isConnected } = useWeb3ModalAccount();
+	// const { open } = useWeb3Modal();
 
 	const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -109,6 +117,8 @@ const Profile = () => {
 			})();
 	}, [isConnected, address, router, baseApiUrl, setUserName, setUserTitle]);
 
+
+
 	return (
 		<section className={`${group}`}>
 			<section className={`${group}__wrapper`}>
@@ -125,7 +135,7 @@ const Profile = () => {
 										paddingInline: ".25rem",
 										borderRadius: ".25rem",
 									}}
-									onClick={() => open()}
+									onClick={() => connect({ connector })}
 								>
 									connect
 								</button>{" "}

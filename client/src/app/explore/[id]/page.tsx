@@ -1,7 +1,8 @@
-import { getMessage, medalAction } from "@/utils/app.mjs";
+import { getMessage, medalAction, getEligible, medalContractAddress } from "@/utils/app.mjs";
 import { FC } from "react";
 import "./page.scss";
-
+import { useAccount } from 'wagmi';
+import { useWriteContract } from 'wagmi';
 interface props {
 	id?: number;
 	title: string;
@@ -25,6 +26,38 @@ interface props {
 	isParticipant: boolean;
 }
 
+	const account = useAccount();
+	const address = account.address || "";
+
+	const { writeContract } = useWriteContract();
+	const abi = [
+		{
+			"inputs": [],
+			"name": "createMedal",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "receivers",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			}
+			],
+			"name": "batchMint",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+	] as const;
+
 export const MedalDetails: FC<props> = ({
 	id,
 	title,
@@ -47,7 +80,22 @@ export const MedalDetails: FC<props> = ({
 	const handleButton = async () => {
 		try {
 			// write function to handle cases
-			await medalAction(id, claimed, isCreator, isParticipant);
+			if (isCreator) {
+				const eligible = await getEligible(id);
+				if (eligible.length < 1) {
+					console.log(eligible);
+				} else {
+					writeContract(
+						{ 
+						  address: medalContractAddress, 
+						  abi, 
+						  functionName: "batchMint", 
+						  args: [eligible, BigInt(id || "")], 
+						}
+					  )
+				}
+			}
+			await medalAction(id, claimed, isParticipant, address);
 		} catch (error) {
 			console.log(error);
 		}

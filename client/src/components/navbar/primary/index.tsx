@@ -1,10 +1,11 @@
 "use client";
 
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { DESKTOP_NAV_LINKS } from "@/assets/data";
 import { Logo, Menu } from "@/components";
 import { useHydration, useUserStore } from "@/hooks";
 import { truncateWalletAddress } from "@/utils";
-import { useWeb3Modal, useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { getBasenameNav } from "@/utils/basename/resolver";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,6 +13,7 @@ import { useEffect, useState } from "react";
 import "./index.scss";
 
 function RenderNavLinks() {
+
 	const hydration = useHydration();
 	return (
 		<>
@@ -49,41 +51,66 @@ function ListItem({ title, to }: { title: string; to: string }) {
 	);
 }
 
-function RenderLoginButton() {
-	const { open } = useWeb3Modal();
-	const { address, isConnected } = useWeb3ModalAccount();
+export function RenderLoginButton() {
+  const account = useAccount();
+  const isConnected = account.isConnected;
+  const address = account.address || ""; // Fallback to an empty string
+  const { connectors, connect } = useConnect();
+  const { disconnect } = useDisconnect();
+  const connector = connectors[1];
 
-	return (
-		<>
-			<li
-				onClick={() => {
-					open();
-				}}
-				id="login"
+  const [basename, setBasename] = useState<string>(""); // State to hold basename
+
+  // Fetch basename when the address changes
+  useEffect(() => {
+    const fetchBasename = async () => {
+      if (address) {
+        const result = await getBasenameNav(address);
+        setBasename(result || ""); // Set basename or fallback to empty string
+		console.log(address, result);
+      }
+    };
+
+    fetchBasename();
+  }, [address]); // Trigger the effect when the address changes
+
+  return (
+    <>
+      <li onClick={() => connect({ connector })}>
+        {isConnected ? (
+          <span>
+			<button
+				className="disconnect__submit-button"
+				type="button"
+				onClick={() => disconnect()}
 			>
-				{isConnected ? (
-					<span>
-						<img
-							src="/defi_pfp.jpg"
-							alt=""
-						/>
-
-						<span>{truncateWalletAddress(address!)}</span>
-					</span>
+			<span> 
+				{basename === address ? (
+				<span>{truncateWalletAddress(address)}</span>
 				) : (
-					"Connect"
+				<span>{basename}</span>
 				)}
-			</li>
-		</>
-	);
+			</span>
+			</button>
+          </span>
+        ) : (
+          "Connect"
+        )}
+      </li>
+    </>
+  );
 }
-
+  
 export const PrimaryNav = () => {
 	const router = useRouter();
 
 	const { setUserName, setUserTitle } = useUserStore();
 
-	const { address, isConnected } = useWeb3ModalAccount();
+	const account = useAccount();
+	const isConnected = account.isConnected;
+	const address = account.address || "";
+
+	// const { address, isConnected } = useWeb3ModalAccount();
 
 	const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -125,3 +152,5 @@ export const PrimaryNav = () => {
 		</nav>
 	);
 };
+
+export default PrimaryNav;

@@ -1,7 +1,8 @@
 import { useFormik } from "formik";
 import { MEDAL_SCHEMA, DEPLOYMENT_CHAINS } from "@/assets/data";
 import { ImageUpload, MedalForm, SelectField } from "@/components";
-import { createMedal } from "@/utils/app.mjs";
+import { createMedal, medalContractAddress } from "@/utils/app.mjs";
+import { useWriteContract } from 'wagmi';
 import "./index.scss";
 
 export const Medal = ({ group }: { group: string }) => {
@@ -13,12 +14,41 @@ export const Medal = ({ group }: { group: string }) => {
 		metrics: "",
 		medals: "0",
 		validator: "",
-		deployChain: "Lukso",
+		deployChain: "Base",
 		additionalInfo: "",
 		endDate: null,
 		startDate: new Date(),
 		working: false,
 	};
+
+	const { writeContract } = useWriteContract();
+	const abi = [
+		{
+			"inputs": [],
+			"name": "createMedal",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		  },
+		  {
+			"inputs": [
+			  {
+				"internalType": "address[]",
+				"name": "receivers",
+				"type": "address[]"
+			  },
+			  {
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			  }
+			],
+			"name": "batchMint",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		  },
+	] as const;
 
 	const {
 		errors,
@@ -36,6 +66,14 @@ export const Medal = ({ group }: { group: string }) => {
 			// Handle form submission logic here (e.g., API call)
 			try {
 				await createMedal(values);
+				writeContract(
+					{ 
+					  address: medalContractAddress, 
+					  abi, 
+					  functionName: "createMedal", 
+					  args: [], 
+					}
+				  )
 			} catch (error) {
 				console.log(error);
 			}

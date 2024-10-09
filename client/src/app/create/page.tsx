@@ -5,8 +5,6 @@ import { useBodyOverflow, useTabSwitcher, useScrollReset } from "@/hooks";
 import { CreateTabs } from "@/components";
 import { Badge, Medal } from "@/views";
 import "./page.scss";
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
-
 interface TabComponents {
 	[key: string]: ReactNode;
 }
@@ -21,9 +19,6 @@ const Create = () => {
 		badge: <Badge group={"badge"} />,
 		medal: <Medal group={"medal"} />,
 	};
-
-	const { address, isConnected } = useWeb3ModalAccount();
-	console.log({ address, isConnected });
 
 	function renderTab() {
 		return tabComponents[activeTab] || null;

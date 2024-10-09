@@ -5,9 +5,11 @@ var userProfile;
 
 const baseAPIURL = "https://wagmibackend.up.railway.app/";
 
-const badgeContractAddress = "0xB07Ad6e27d4Cf9a1D2bCf965F1eC66B20276c312";
-const badgeABI = [
+export const badgeContractAddress = "0xB07Ad6e27d4Cf9a1D2bCf965F1eC66B20276c312";
+export const badgeABI = [
 	{
+		stateMutability: "nonpayable",
+		type: "function",
 		inputs: [
 			{
 				internalType: "address",
@@ -16,13 +18,11 @@ const badgeABI = [
 			},
 		],
 		name: "mint",
-		outputs: [],
-		stateMutability: "nonpayable",
-		type: "function",
+		outputs: [],			
 	},
-];
+]
 
-const medalContractAddress = "0xb7083e647240AeD427b6869A5E84962B4DDEc30c";
+export const medalContractAddress = "0xb7083e647240AeD427b6869A5E84962B4DDEc30c";
 const medalABI = [
     {
 		"inputs": [],
@@ -132,9 +132,7 @@ export const getUserAddress = async () => {
 	return address;
 };
 
-export const logIn = async () => {
-	await connectWallet();
-	const address = await getUserAddress();
+export const checkUser = async (address) => {
 	try {
 		const response = await fetch(`${baseAPIURL}checkUser/${address}`);
 
@@ -149,13 +147,11 @@ export const logIn = async () => {
 			console.log("true");
 			return true;
 		} else {
-			await getProfile();
 			console.log("false");
 			return false;
 		}
 	} catch (error) {
 		console.log(error);
-		console.log("not working");
 	}
 };
 
@@ -232,16 +228,13 @@ export const uploadImage = async (image) => {
 };
 
 // mint badge
-export const mintBadge = async (mintBody) => {
+export const mintBadge = async (mintBody, address) => {
 	try {
-		await connectWallet();
-		const minter = await getUserAddress();
-
 		const image = mintBody.image;
 		const url = await uploadImage(image);
 		mintBody.image = url;
 
-		mintBody.minter = minter;
+		mintBody.minter = address;
 
 		// call mint function to API with details
 		const endPoint = "mintBadge";
@@ -262,14 +255,14 @@ export const mintBadge = async (mintBody) => {
 
 		const data = await response.json();
 
-		const contract = new ethers.Contract(
-			badgeContractAddress,
-			badgeABI,
-			signer,
-		);
-		const TX = await contract.mint(mintBody.receiver);
-		const receipt = await TX.wait();
-		console.log("created", receipt);
+		// const contract = new ethers.Contract(
+		// 	badgeContractAddress,
+		// 	badgeABI,
+		// 	signer,
+		// );
+		// const TX = await contract.mint(mintBody.receiver);
+		// const receipt = await TX.wait();
+		// console.log("created", receipt);
 
 		console.log("Minted Successfully", data.response);
 	} catch (error) {
@@ -308,8 +301,8 @@ function getType(input) {
 // create medal
 export const createMedal = async (createBody) => {
 	try {
-		await connectWallet();
-		const creator = await getUserAddress();
+		// await connectWallet(); shift to frontend (base smart walllet)
+		const creator = await getUserAddress(); // same
 
 		const image = createBody.image;
 		const url = await uploadImage(image);
@@ -347,34 +340,17 @@ export const createMedal = async (createBody) => {
 
 		const data = await response.json();
 
-		const contract = new ethers.Contract(
-			medalContractAddress,
-			medalABI,
-			signer,
-		);
-
-		const TX = await contract.createMedal();
-		const receipt = await TX.wait();
-		console.log("created", receipt);
-
-		console.log("Minted Successfully", data.response, receipt);
+		console.log("Created Successfully", data.response, receipt);
 	} catch (error) {
 		console.log(error.code);
 	}
 };
 
 // participate
-export const medalAction = async (id, claimed, isCreator, isParticipant) => {
+export const medalAction = async (id, claimed, isParticipant, address) => {
 	try {
-		await connectWallet();
-		const address = await getUserAddress();
-
 		if (claimed) {
 			console.log(claimed);
-		}
-
-		if (isCreator) {
-			await mintEligible();
 		}
 
 		if (isParticipant) {
@@ -440,7 +416,7 @@ export const returnProfile = () => {
 	return { userProfile };
 };
 
-export const mintEligible = async (tokenId) => {
+export const getEligible = async (tokenId) => {
 	try {
 		const endPoint = `getEligibleArray/${tokenId}`;
 
@@ -459,20 +435,21 @@ export const mintEligible = async (tokenId) => {
 
 		const data = await response.json();
 		const eligible = data.eligible;
-		if (eligible.length < 1) {
-			console.log(eligible);
-		} else {
+		// if (eligible.length < 1) {
+		// 	console.log(eligible);
+		// } else {
 			// mint to eligible
-			const contract = new ethers.Contract(
-				medalContractAddress,
-				medalABI,
-				signer,
-			);
-			const TX = await contract.batchMint(eligible, tokenId);
-			const receipt = await TX.wait();
-			console.log("created", receipt);
-		}
+		// 	const contract = new ethers.Contract(
+		// 		medalContractAddress,
+		// 		medalABI,
+		// 		signer,
+		// 	);
+		// 	const TX = await contract.batchMint(eligible, tokenId);
+		// 	const receipt = await TX.wait();
+		// 	console.log("created", receipt);
 		console.log(data);
+		return eligible;
+		
 	} catch (error) {
 		console.log(error);
 	}

@@ -84,14 +84,14 @@ const FormField: FC<props> = ({
 			<TextField
 				id="receiver"
 				group={group}
-				label="Receivers wallet address"
+				label="Receivers address/Basename"
 				value={receiver}
 				touched={touched.receiver}
 				onBlur={handleBlur}
 				error={errors.receiver}
 				edit={true}
 				onChange={handleFormChange}
-				placeholder="0x636h821nb"
+				placeholder="0x/.base.eth"
 			/>
 
 			{/* Timestamp component for start and end dates */}

@@ -3,7 +3,7 @@
 import { Hamburger } from "@/assets/icons";
 import { useToggle } from "@/hooks";
 import { Modal } from "@/views";
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { useAccount } from 'wagmi';
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -11,8 +11,12 @@ import { MenuModal } from "..";
 import "./index.scss";
 
 export const Menu = () => {
+	const account = useAccount();
+	const isConnected = account.isConnected;
+	const address = account.address || "";
+
 	const router = useRouter();
-	const { address, isConnected } = useWeb3ModalAccount();
+	// const { address, isConnected } = useWeb3ModalAccount();
 	const { status: isMenuActive, toggleStatus: setIsMenuActive } = useToggle();
 
 	const baseAPIURL = process.env.NEXT_PUBLIC_API_URL;
